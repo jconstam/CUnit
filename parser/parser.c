@@ -8,16 +8,14 @@
 
 int main( int argc, char* argv[ ] )
 {
-	char* rootFolder = NULL;
-	
-	rootFolder = parseCommandLineArgs( argc, argv );
-	if( rootFolder == NULL )
+	PARSER_ARGS* args = parseCommandLineArgs( argc, argv );
+	if( args == NULL )
 	{
 		printf( "Error parsing arguments\n" );
 		exit( -1 );
 	}
 	
-	cleanCommandLineArgs( rootFolder );
+	cleanCommandLineArgs( args );
 	
 	return 0;
 }

@@ -2,33 +2,50 @@
 #include <unistd.h>
 #include <string.h>
 
-char* parseCommandLineArgs( int argc, char* argv[ ] )
+#include "parser_args.h"
+
+PARSER_ARGS* parseCommandLineArgs( int argc, char* argv[ ] )
 {
 	int opt = 0;
-	char* rootFolder = NULL;
-
-	while( opt >= 0 )
+	PARSER_ARGS* args = calloc( 1U, sizeof( PARSER_ARGS ) );
+	if( args != NULL )
 	{
-		opt = getopt( argc, argv, "r:" );
-		switch( opt )
+		while( opt >= 0 )
 		{
-			case( 'r' ):
-				rootFolder = calloc( strlen( optarg ), sizeof( char ) );
-				if( rootFolder != NULL )
-				{
-					strcpy( rootFolder, optarg );	
-				}
-				break;
-			default:
-				opt = -1;
-				break;
+			opt = getopt( argc, argv, "r:" );
+			switch( opt )
+			{
+				case( 'r' ):
+					args.rootFolder = calloc( strlen( optarg ), sizeof( char ) );
+					if( args.rootFolder != NULL )
+					{
+						strcpy( args.rootFolder, optarg );	
+					}
+					break;
+				case( '?' ):
+					opt = -1;
+					if( args != NULL )
+					{
+						free( args.rootFolder );
+					}
+					free( args );
+					args = NULL;
+					break;
+				default:
+					opt = -1;
+					break;
+			}
 		}
 	}
 	
-	return rootFolder;
+	return args;
 }
 
-void cleanCommandLineArgs( char* rootFolder )
+void cleanCommandLineArgs( PARSER_ARGS* args )
 {
-	free( rootFolder );
+	if( args != NULL )
+	{
+		free( args.rootFolder );
+	}
+	free( args );
 }
