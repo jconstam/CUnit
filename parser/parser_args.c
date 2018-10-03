@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "parser_args.h"
 
@@ -10,26 +11,26 @@ PARSER_ARGS* parseCommandLineArgs( int argc, char* argv[ ] )
 	PARSER_ARGS* args = calloc( 1U, sizeof( PARSER_ARGS ) );
 	if( args != NULL )
 	{
+		args->verbose = false;
+		
 		while( opt >= 0 )
 		{
-			opt = getopt( argc, argv, "r:" );
+			opt = getopt( argc, argv, "vr:" );
 			switch( opt )
 			{
+				case( 'v' ):
+					args->verbose = true;
+					break;
 				case( 'r' ):
-					args.rootFolder = calloc( strlen( optarg ), sizeof( char ) );
-					if( args.rootFolder != NULL )
-					{
-						strcpy( args.rootFolder, optarg );	
-					}
+					( void ) realpath( optarg, args->rootFolder );
 					break;
 				case( '?' ):
-					opt = -1;
-					if( args != NULL )
-					{
-						free( args.rootFolder );
-					}
+					printf( "Received unknown command line parameter\n" );
+					
 					free( args );
 					args = NULL;
+					
+					opt = -1;
 					break;
 				default:
 					opt = -1;
@@ -38,14 +39,17 @@ PARSER_ARGS* parseCommandLineArgs( int argc, char* argv[ ] )
 		}
 	}
 	
+	if( ( args != NULL ) && ( args->verbose == true ) )
+	{
+		printf( "Command line arguments:\n" );
+		printf( "\tVerbose:      %s\n", ( args->verbose ? "YES" : "NO" ) );
+		printf( "\tRoot Folder:  %s\n", args->rootFolder );
+	}
+	
 	return args;
 }
 
 void cleanCommandLineArgs( PARSER_ARGS* args )
 {
-	if( args != NULL )
-	{
-		free( args.rootFolder );
-	}
 	free( args );
 }
