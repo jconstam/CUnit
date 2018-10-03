@@ -1,2 +1,2 @@
 # CUnit
-A pure C Unit Test
+A pure C Unit Test Framework
