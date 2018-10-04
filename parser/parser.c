@@ -7,23 +7,27 @@
 #include "parser_args.h"
 #include "parser_findfile.h"
 
-//static void failAndExit( PARSER_ARGS* args, FILE_ENTRY* fileList )
+static void cleanupAndExit( bool successful, PARSER_ARGS* args, FILE_LIST* fileList )
+{
+	cleanCommandLineArgs( args );
+	cleanupFileList( fileList );
+	
+	exit( successful ? 0 : -1 );
+}
 
 int main( int argc, char* argv[ ] )
 {
 	PARSER_ARGS* args = parseCommandLineArgs( argc, argv );
 	if( args == NULL )
 	{
-		exit( -1 );
+		cleanupAndExit( false, args, NULL );
 	}
 	
-	FILE_ENTRY* fileList = findAllCFiles( args );
+	FILE_LIST* fileList = findAllCFiles( args );
 	if( fileList == NULL )
 	{
-		exit( -1 );
+		cleanupAndExit( false, args, fileList );
 	}
 	
-	cleanCommandLineArgs( args );
-	
-	return 0;
+	cleanupAndExit( true, args, fileList );
 }
