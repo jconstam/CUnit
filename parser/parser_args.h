@@ -1,3 +1,6 @@
+#ifndef PARSER_ARGS_H__
+#define PARSER_ARGS_H__
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
@@ -10,3 +13,5 @@ typedef struct
 
 PARSER_ARGS* parseCommandLineArgs( int, char*[ ] );
 void cleanCommandLineArgs( PARSER_ARGS* );
+
+#endif

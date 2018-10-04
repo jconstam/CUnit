@@ -7,6 +7,7 @@ project( ${PARSER_PROJECT} )
 set( PARSER_SOURCES 
 	${PARSER_FOLDER}/parser.c
 	${PARSER_FOLDER}/parser_args.c
+	${PARSER_FOLDER}/parser_findfile.c
 	)
 	
 include_directories( ${PARSER_FOLDER} )
