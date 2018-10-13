@@ -6,6 +6,7 @@
 
 #include "parser_args.h"
 #include "parser_findfile.h"
+#include "parser_readfile.h"
 
 static void cleanupAndExit( bool successful, PARSER_ARGS* args, FILE_LIST* fileList )
 {
@@ -28,6 +29,9 @@ int main( int argc, char* argv[ ] )
 	{
 		cleanupAndExit( false, args, fileList );
 	}
+	
+	
+	TEST_LIST* testList = parseFiles( args, fileList );
 	
 	cleanupAndExit( true, args, fileList );
 }
