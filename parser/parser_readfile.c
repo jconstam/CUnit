@@ -29,6 +29,17 @@ typedef struct
 	char*		contents;
 } FILE_DATA;
 
+typedef struct
+{
+	bool		hasName;
+	bool 		hasTooManyParams;
+	
+	uint32_t	offset;
+	
+	uint32_t 	parameterCount;
+	char 		parameters[ MAX_NUM_PARAMS ][ MAX_PARAM_LENGTH ];
+} LINE_CONTENTS;
+
 static uint32_t getFileSize( FILE* fileHandle )
 {
 	uint32_t fileSize;
@@ -121,17 +132,6 @@ static FILE_DATA* preParseFile( FILE* fileHandle )
 	return currentFile;
 }
 
-typedef struct
-{
-	bool		hasName;
-	bool 		hasTooManyParams;
-	
-	uint32_t	offset;
-	
-	uint32_t 	parameterCount;
-	char 		parameters[ MAX_NUM_PARAMS ][ MAX_PARAM_LENGTH ];
-} LINE_CONTENTS;
-
 static LINE_CONTENTS* parseLine( const char* name, char* text )
 {
 	LINE_CONTENTS* lineData = calloc( 1U, sizeof( LINE_CONTENTS ) );
@@ -186,7 +186,7 @@ static LINE_CONTENTS* parseLine( const char* name, char* text )
 	return lineData;
 }
 
-static TEST_MODULE* parseFile( PARSER_ARGS* args, FILE_DATA* preParsedFile, char* fileName )
+static bool parseFile( TEST_MODULE* module, PARSER_ARGS* args, FILE_DATA* preParsedFile, char* fileName )
 {
 	bool successful = false;
 	LINE_CONTENTS* currTestFunc = NULL;
@@ -214,17 +214,6 @@ static TEST_MODULE* parseFile( PARSER_ARGS* args, FILE_DATA* preParsedFile, char
 		if( args->verbose )
 		{
 			printf( "\tUnit test file declaration has too many parameters - got %u, expected %u\n", testFileDecl->parameterCount, PARAM_COUNT_DECL );
-		}
-		
-		goto parseFileCleanup;
-	}
-	
-	TEST_MODULE* module = calloc( 1U, sizeof( TEST_MODULE ) );
-	if( module == NULL )
-	{
-		if( args->verbose )
-		{
-			printf( "\tError creating module\n" );
 		}
 		
 		goto parseFileCleanup;
@@ -323,20 +312,26 @@ parseFileCleanup:
 		free( module );
 		module = NULL;
 	}
-
-	return module;
+	
+	return successful;
 }
 
 TEST_LIST* parseFiles( PARSER_ARGS* args, FILE_LIST* fileList )
 {
 	uint32_t fileIndex;
 	
+	TEST_LIST* tests = calloc( 1U, sizeof( TEST_LIST ) );
+	if( tests == NULL )
+	{
+		return NULL;
+	}
+	
 	for( fileIndex = 0U; fileIndex < fileList->count; fileIndex++ )
 	{
 		uint32_t fileSize = 0U;
 		FILE* fileHandle = NULL;
 		FILE_DATA* preParsedFile = NULL;
-		TEST_MODULE* moduleData = NULL;
+		TEST_MODULE* module = NULL;
 	
 		if( args->verbose )
 		{
@@ -350,7 +345,7 @@ TEST_LIST* parseFiles( PARSER_ARGS* args, FILE_LIST* fileList )
 			{
 				printf( "\tCould not open file\n" );
 			}
-			goto cleanupParseFiles;
+			continue;
 		}
 		
 		fileSize = getFileSize( fileHandle );
@@ -360,7 +355,7 @@ TEST_LIST* parseFiles( PARSER_ARGS* args, FILE_LIST* fileList )
 			{
 				printf( "\tFile is 0 bytes\n" );
 			}
-			goto cleanupParseFiles;
+			continue;
 		}
 		
 		preParsedFile = preParseFile( fileHandle );
@@ -373,8 +368,21 @@ TEST_LIST* parseFiles( PARSER_ARGS* args, FILE_LIST* fileList )
 			goto cleanupParseFiles;
 		}
 		
-		moduleData = parseFile( args, preParsedFile, fileList->files[ fileIndex ].fileName );
-		if( moduleData == NULL )
+		if( tests->moduleCount >= tests->modulesAllocated )
+		{
+			tests->modulesAllocated += ALLOC_SIZE * sizeof( TEST_MODULE );
+			tests->modules = realloc( tests->modules, tests->modulesAllocated * sizeof( TEST_MODULE ) );
+			if( tests->modules == NULL )
+			{
+				if( args->verbose )
+				{
+					printf( "\tError parsing modules\n" );
+					goto cleanupParseFiles;
+				}
+			}
+		}
+		
+		if( ! parseFile( &( tests->modules[ tests->moduleCount ] ), args, preParsedFile, fileList->files[ fileIndex ].fileName ) )
 		{
 			if( args->verbose )
 			{
@@ -382,6 +390,8 @@ TEST_LIST* parseFiles( PARSER_ARGS* args, FILE_LIST* fileList )
 			}
 			goto cleanupParseFiles;
 		}
+		
+		tests->moduleCount++;
 		
 		continue;
 		
@@ -400,17 +410,35 @@ cleanupParseFiles:
 			free( preParsedFile );
 		}
 		
-		if( moduleData != NULL )
-		{
-			if( moduleData->functions != NULL )
-			{
-				free( moduleData->functions );
-			}
-			free( moduleData );
-		}
+		cleanupTestList( tests );
+		
+		tests = NULL;
+		
+		break;
 	}
 	
-	return NULL;
+	return tests;
 }
 
+void cleanupTestList( TEST_LIST* tests )
+{
+	if( tests != NULL )
+	{
+		if( tests->modules != NULL )
+		{
+			int i;
+			for( i = 0; i < tests->moduleCount; i++ )
+			{
+				if( tests->modules[ i ].functions != NULL )
+				{
+					free( tests->modules[ i ].functions );
+				}
+			}
+			
+			free( tests->modules );
+		}
+		
+		free( tests );
+	}
+}
 

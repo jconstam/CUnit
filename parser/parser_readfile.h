@@ -32,5 +32,6 @@ typedef struct
 } TEST_LIST;
 
 TEST_LIST* parseFiles( PARSER_ARGS*, FILE_LIST* );
+void cleanupTestList( TEST_LIST* );
 
 #endif
