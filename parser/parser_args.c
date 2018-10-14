@@ -15,7 +15,7 @@ PARSER_ARGS* parseCommandLineArgs( int argc, char* argv[ ] )
 		
 		while( opt >= 0 )
 		{
-			opt = getopt( argc, argv, "vr:" );
+			opt = getopt( argc, argv, "vr:o:" );
 			switch( opt )
 			{
 				case( 'v' ):
@@ -23,6 +23,9 @@ PARSER_ARGS* parseCommandLineArgs( int argc, char* argv[ ] )
 					break;
 				case( 'r' ):
 					( void ) realpath( optarg, args->rootFolder );
+					break;
+				case( 'o' ):
+					( void ) realpath( optarg, args->outputFile );
 					break;
 				case( '?' ):
 					printf( "Received unknown command line parameter\n" );
@@ -44,6 +47,7 @@ PARSER_ARGS* parseCommandLineArgs( int argc, char* argv[ ] )
 		printf( "Command line arguments:\n" );
 		printf( "\tVerbose:      %s\n", ( args->verbose ? "YES" : "NO" ) );
 		printf( "\tRoot Folder:  %s\n", args->rootFolder );
+		printf( "\tOutput File:  %s\n", args->outputFile );
 	}
 	
 	return args;

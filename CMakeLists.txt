@@ -9,6 +9,7 @@ set( PARSER_SOURCES
 	${PARSER_FOLDER}/parser_args.c
 	${PARSER_FOLDER}/parser_findfile.c
 	${PARSER_FOLDER}/parser_readfile.c
+	${PARSER_FOLDER}/parser_output.c
 	)
 	
 include_directories( ${PARSER_FOLDER} )

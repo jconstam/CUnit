@@ -9,6 +9,7 @@ typedef struct
 {
 	bool	verbose;
 	char	rootFolder[ PATH_MAX ];
+	char	outputFile[ PATH_MAX ];
 } PARSER_ARGS;
 
 PARSER_ARGS* parseCommandLineArgs( int, char*[ ] );
