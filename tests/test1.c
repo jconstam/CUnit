@@ -18,12 +18,12 @@ void One_Cleanup( void )
 	printf( "Cleanup for Test One" );
 }
 
-CUNIT_TEST( ONE, checkTrue )
+void CUNIT_TEST( ONE, checkTrue )
 {
 	EXPECT_EQ( true, One_returnTrue( ) );
 }
 
-CUNIT_TEST( ONE, checkFalse )
+void CUNIT_TEST( ONE, checkFalse )
 {
 	EXPECT_EQ( false, One_returnFalse( ) );
 }
